@@ -58,7 +58,7 @@ func getConversation() ([]string, error) {
 	continueCode := ""
 	messages := []string{}
 
-	for {
+	for i := 0; i < 50; i++ {
 		resp, err := makeConversationRequest(continueCode)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to make conversation request: %w", err)
