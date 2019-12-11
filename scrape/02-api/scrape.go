@@ -99,3 +99,28 @@ func parseHtml(message string) ([]tweet, error) {
 
 	return ts, nil
 }
+
+func main() {
+	// get the whole conversation
+	resp, err := getConversation()
+	if err != nil {
+		panic(err)
+	}
+
+	tweets := []tweet{}
+	for _, msg := range resp {
+		ts, err := parseHtml(msg)
+		if err != nil {
+			panic(err)
+		}
+		tweets = append(tweets, ts...)
+	}
+
+	bs, err := json.MarshalIndent(tweets, "", "\t")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(bs))
+	fmt.Println("Number of tweets:", len(tweets))
+}
