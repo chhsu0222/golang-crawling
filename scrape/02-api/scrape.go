@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 const site = "https://twitter.com/i/Todd_McLeod/conversation/1169751640926146560"
@@ -48,4 +49,31 @@ func makeConversationRequest(maxPos string) (*conversationResponse, error) {
 	}
 
 	return cr, nil
+}
+
+func getConversation() ([]string, error) {
+	// initial value of max_position
+	continueCode := ""
+	messages := []string{}
+
+	for {
+		resp, err := makeConversationRequest(continueCode)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to make conversation request: %w", err)
+		}
+
+		messages = append(messages, resp.Html)
+
+		if !resp.More {
+			break
+		}
+
+		// update the max_position
+		continueCode = resp.MinPos
+		// follow the rules in robots.txt:
+		// Wait 1 second between successive requests.
+		time.Sleep(time.Second)
+	}
+
+	return messages, nil
 }
