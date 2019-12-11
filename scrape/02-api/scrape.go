@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -76,4 +78,24 @@ func getConversation() ([]string, error) {
 	}
 
 	return messages, nil
+}
+
+func parseHtml(message string) ([]tweet, error) {
+	rdr := strings.NewReader(message)
+	doc, err := goquery.NewDocumentFromReader(rdr)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to read html: %w", err)
+	}
+
+	ts := []tweet{}
+
+	doc.Find(".tweet").Each(func(i int, s *goquery.Selection) {
+		ts = append(ts, tweet{
+			Name:     s.Find(".account-group .fullname").Text(),
+			Username: s.Find(".account-group .username").Text(),
+			Message:  s.Find(".tweet-text").Text(),
+		})
+	})
+
+	return ts, nil
 }
